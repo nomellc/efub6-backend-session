@@ -26,6 +26,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDto, HttpStatusCode.valueOf(e.getErrorCode().getStatus()));
     }
 
+    //vaild 어노테이션 사용하기 위해서 추가한 코드
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<ErrorDto> handleValidationException(MethodArgumentNotValidException e, HttpServletRequest request) {
         String errorMessage = e.getBindingResult().getFieldErrors().stream()

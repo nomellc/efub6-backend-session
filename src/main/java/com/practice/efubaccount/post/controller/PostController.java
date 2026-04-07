@@ -35,15 +35,15 @@ public class PostController {
     // 게시물 1개 조회
     @GetMapping("/{id}")
     public ResponseEntity<PostResponse> getPost(@PathVariable("id") Long postId){
-        PostResponse response = postService.getPost(postId);
-        return ResponseEntity.ok(response);
+       PostResponse response = postService.getPost(postId);
+       return ResponseEntity.ok(response);
     }
 
     // 게시글 수정
     @PatchMapping("/{id}")
     public ResponseEntity<Void> updatePostContent(@PathVariable("id") Long postId,
                                                   @RequestHeader("Auth-id") Long accountId,
-                                                  @Valid @RequestBody PostUpdateRequest request) {
+                                                  @Valid @RequestBody PostUpdateRequest request){
         postService.updatePostContent(postId, accountId, request);
         return ResponseEntity.noContent().build();
     }
@@ -51,8 +51,10 @@ public class PostController {
     // 게시글 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable("id") Long postId,
-                                           @RequestHeader("Auth-id") Long accountId) {
+                                           @RequestHeader("Auth-id") Long accountId){
         postService.deletePost(postId, accountId);
         return ResponseEntity.noContent().build();
     }
+
+
 }
