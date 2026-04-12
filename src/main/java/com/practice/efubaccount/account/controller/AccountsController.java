@@ -46,9 +46,9 @@ public class AccountsController {
     // 계정 논리적 삭제(탈퇴): PATCH /accounts/{accountId}
     @PatchMapping("/{accountId}")
     public ResponseEntity<Map<String, String>> deleteAccount(@PathVariable("accountId") Long accountId) {
-        accountsService.deleteAccount(accountId);  // 상태 변경만 수행
+        accountsService.deleteAccount(accountId);
         Map<String, String> response = new HashMap<>();
-        response.put("message", "성공적으로 탈퇴되었습니다.");
+        response.put("message", "계정이 비활성화되었습니다.");
         return ResponseEntity.ok(response);
     }
 

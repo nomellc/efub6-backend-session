@@ -30,12 +30,12 @@ public class AccountsService {
     // 회원 생성
     @Transactional
     public CreateAccountResponseDto createAccount(CreateAccountRequestDto requestDto) {
-        // 이메일 중복 검사
         if (accountRepository.existsByEmail(requestDto.getEmail())) {
-            throw new IllegalArgumentException("이미 존재하는 email입니다. " + requestDto.getEmail());
+            throw new IllegalArgumentException("이미 존재하는 이메일입니다." + requestDto.getEmail());
         }
         Account account = requestDto.toEntity();
         Account savedAccount = accountRepository.save(account);
+
         return CreateAccountResponseDto.from(savedAccount);
     }
 
@@ -45,6 +45,7 @@ public class AccountsService {
         Account account = accountRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
         account.updateBio(requestDto.getBio());
+        Account updateAccount = accountRepository.save(account);
         return AccountResponseDto.from(account);
     }
 
@@ -53,7 +54,8 @@ public class AccountsService {
     public void deleteAccount(Long accountId) {
         Account account = accountRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
-        account.changeStatus(AccountStatus.DEACTIVATED);
+        account.changeStatus(AccountStatus.DEACTIVE);
+        accountRepository.save(account);
     }
 
     // 회원 물리적 삭제
