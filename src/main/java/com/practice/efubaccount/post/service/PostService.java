@@ -35,7 +35,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostListResponse getAllPost() { //stream쓰면 list가 하나씩 쪼개짐
+    public PostListResponse getAllPosts() { //stream쓰면 list가 하나씩 쪼개짐
         List<PostSummary> postSummaries = postRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(PostSummary::from)
@@ -55,7 +55,7 @@ public class PostService {
     @Transactional
     public void updatePostContent(Long postId, Long accountId, @Valid PostUpdateRequest request) {
         Post post = findByPostId(postId);
-        Account account = accountsService.findByAccountId(accountId);
+        Account account = accountService.findByAccountId(accountId);
 
         //로그인 한 사람이 포스트 작성자인지 확인하는 코드 필요 -> 공통 메소드로 빼기
         authorizePostWriter(post, account);
