@@ -11,6 +11,7 @@ import com.practice.efubaccount.post.dto.response.PostListResponse;
 import com.practice.efubaccount.post.dto.response.PostResponse;
 import com.practice.efubaccount.post.dto.summary.PostSummary;
 import com.practice.efubaccount.post.repository.PostRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,32 +31,37 @@ public class PostService {
         Post newPost = request.toEntity(writerAccount);
         postRepository.save(newPost);
         return newPost.getId();
+
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
+    public PostListResponse getAllPosts() { //stream쓰면 list가 하나씩 쪼개짐
+        List<PostSummary> postSummaries = postRepository.findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(PostSummary::from)
+                .toList();
+        return new PostListResponse(postSummaries, postRepository.count());
+    }
+
+    @Transactional //조회수 업데이트 필요해서 readOnly 안 씀
     public PostResponse getPost(Long postId) {
-        // 조회수 증가
+        //조회수 증가
         postRepository.increaseViewCount(postId);
 
         Post post = findByPostId(postId);
         return PostResponse.from(post);
     }
 
-    @Transactional(readOnly = true)
-    public PostListResponse getAllPosts() {
-        List<PostSummary> postSummaries = postRepository.findAllByOrderByCreatedAtDesc()
-                .stream()
-                .map(PostSummary::from).toList();
-        return new PostListResponse(postSummaries, postRepository.count());
-    }
-
     @Transactional
-    public void updatePostContent(Long postId, PostUpdateRequest request, Long accountId) {
+    public void updatePostContent(Long postId, Long accountId, @Valid PostUpdateRequest request) {
         Post post = findByPostId(postId);
         Account account = accountService.findByAccountId(accountId);
 
+        //로그인 한 사람이 포스트 작성자인지 확인하는 코드 필요 -> 공통 메소드로 빼기
         authorizePostWriter(post, account);
+
         post.changeContent(request.content());
+
     }
 
     @Transactional
@@ -69,11 +75,11 @@ public class PostService {
 
     public Post findByPostId(Long postId) {
         return postRepository.findById(postId)
-                .orElseThrow(()-> new CustomException(ErrorCode.POST_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
     }
 
     private void authorizePostWriter(Post post, Account account) {
-        if(!post.getWriter().equals(account)) {
+        if (!post.getWriter().equals(account)) {
             throw new CustomException(ErrorCode.POST_ACCOUNT_MISMATCH);
         }
     }

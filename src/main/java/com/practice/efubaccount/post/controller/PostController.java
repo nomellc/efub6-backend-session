@@ -1,5 +1,6 @@
 package com.practice.efubaccount.post.controller;
 
+import com.practice.efubaccount.post.domain.Post;
 import com.practice.efubaccount.post.dto.request.PostCreateRequest;
 import com.practice.efubaccount.post.dto.request.PostUpdateRequest;
 import com.practice.efubaccount.post.dto.response.PostListResponse;
@@ -33,24 +34,27 @@ public class PostController {
 
     // 게시물 1개 조회
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPost(@PathVariable("id") Long id){
-        return ResponseEntity.ok(postService.getPost(id));
+    public ResponseEntity<PostResponse> getPost(@PathVariable("id") Long postId){
+       PostResponse response = postService.getPost(postId);
+       return ResponseEntity.ok(response);
     }
 
     // 게시글 수정
     @PatchMapping("/{id}")
     public ResponseEntity<Void> updatePostContent(@PathVariable("id") Long postId,
-                                                  @RequestHeader("Auth-Id") Long accountId,
-                                                  @Valid @RequestBody PostUpdateRequest request) {
-        postService.updatePostContent(postId, request, accountId);
+                                                  @RequestHeader("Auth-id") Long accountId,
+                                                  @Valid @RequestBody PostUpdateRequest request){
+        postService.updatePostContent(postId, accountId, request);
         return ResponseEntity.noContent().build();
     }
 
     // 게시글 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable("id") Long postId,
-                                           @RequestHeader("Auth-Id") Long accountId){
+                                           @RequestHeader("Auth-id") Long accountId){
         postService.deletePost(postId, accountId);
         return ResponseEntity.noContent().build();
     }
+
+
 }
