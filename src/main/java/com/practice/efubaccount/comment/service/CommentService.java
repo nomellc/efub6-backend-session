@@ -33,6 +33,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
 
+    // 댓글 생성
     @Transactional
     public Long createComment(Long postId, CommentRequest request) {
         Long accountId = request.getAccountId();
@@ -43,19 +44,22 @@ public class CommentService {
         return newComment.getId();
     }
 
+
+    // postId 로 댓글 목록 조회
     @Transactional(readOnly = true)
     public PostCommentResponse getPostCommentList(Long postId) {
         List<Comment> commentList = commentRepository.findAllByPostIdOrderByCreatedAt(postId);
-        return PostCommentResponse.of(postId,commentList);
+        return PostCommentResponse.of(postId, commentList);
     }
 
-    @Transactional(readOnly=true)
+    // accountId 로 댓글 목록 조회
+    @Transactional(readOnly = true)
     public AccountCommentResponse getAccountCommentList(Long accountId) {
         Account account = accountService.findByAccountId(accountId);
         List<Comment> commentList = commentRepository.findAllByWriterAccountIdOrderByCreatedAtDesc(accountId);
         return AccountCommentResponse.of(account, commentList);
     }
-
+    
     @Transactional
     public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long accountId) {
         Comment comment = findByCommentId(commentId);

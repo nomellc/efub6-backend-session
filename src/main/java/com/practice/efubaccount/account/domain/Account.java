@@ -1,13 +1,12 @@
 package com.practice.efubaccount.account.domain;
 
-// week4 import 문 추가 for 연관관계 매핑
 import com.practice.efubaccount.comment.domain.Comment;
-
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList; // import 문 추가
+import java.util.ArrayList;
 import java.util.List;
+
 
 @Entity
 @Getter
@@ -39,8 +38,8 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private AccountStatus status = AccountStatus.ACTIVE;
 
-    // week4 연관관계의 Owner 설정
-    @OneToMany(mappedBy = "writer",cascade = CascadeType.ALL,orphanRemoval = true)
+    // 연관관계의 Owner 설정
+    @OneToMany(mappedBy = "writer",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> commentList = new ArrayList<>();
 
     @Builder

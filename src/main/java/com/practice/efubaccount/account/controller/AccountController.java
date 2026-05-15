@@ -48,7 +48,7 @@ public class AccountController {
     public ResponseEntity<Map<String, String>> deleteAccount(@PathVariable("accountId") Long accountId) {
         accountService.deleteAccount(accountId);  // 상태 변경만 수행
         Map<String, String> response = new HashMap<>();
-        response.put("message", "성공적으로 탈퇴되었습니다.");
+        response.put("message", "계정이 비활성화되었습니다.");
         return ResponseEntity.ok(response);
     }
 

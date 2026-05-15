@@ -21,5 +21,4 @@ public class CommentRequest {
                 .post(post)
                 .build();
     }
-
 }

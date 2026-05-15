@@ -1,5 +1,6 @@
 package com.practice.efubaccount.account.dto.response;
 
+
 import com.practice.efubaccount.account.domain.Account;
 import com.practice.efubaccount.comment.domain.Comment;
 import com.practice.efubaccount.comment.dto.response.CommentResponse;
@@ -19,6 +20,7 @@ public class AccountCommentResponse {
     private final List<CommentResponse> accountCommentList;
     private final Long count;
 
+    // 빌더
     public static AccountCommentResponse of(Account account, List<Comment> commentList) {
         return AccountCommentResponse.builder()
                 .accountNickname(account.getNickname())
@@ -26,5 +28,4 @@ public class AccountCommentResponse {
                 .count((long) commentList.size())
                 .build();
     }
-
 }
