@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 
@@ -53,5 +54,56 @@ public class CommentService {
         Account account = accountService.findByAccountId(accountId);
         List<Comment> commentList = commentRepository.findAllByWriterAccountIdOrderByCreatedAtDesc(accountId);
         return AccountCommentResponse.of(account, commentList);
+    }
+
+    @Transactional
+    public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, Long accountId) {
+        Comment comment = findByCommentId(commentId);
+        Account account = accountService.findByAccountId(accountId);
+        authorizeCommentWriter(comment, account);
+        comment.updateContent(request.getContent());
+        return CommentResponse.of(comment);
+    }
+
+    @Transactional
+    public void deleteComment(Long commentId, Long accountId) {
+        Comment comment = findByCommentId(commentId);
+        Account account = accountService.findByAccountId(accountId);
+        authorizeCommentWriter(comment, account);
+        commentRepository.delete(comment);
+    }
+
+    @Transactional
+    public void likeComment(Long commentId, Long accountId) {
+        Comment comment = findByCommentId(commentId);
+        Account account = accountService.findByAccountId(accountId);
+        if(commentLikeRepository.existsByCommentAndAccount(comment, account)) {
+            throw new CustomException(ErrorCode.LIKE_ALREADY_EXISTS);
+        }
+        CommentLike like = CommentLike.builder()
+                .comment(comment)
+                .account(account)
+                .build();
+        commentLikeRepository.save(like);
+    }
+
+    @Transactional
+    public void unlikeComment(Long commentId, Long accountId) {
+        Comment comment = findByCommentId(commentId);
+        Account account = accountService.findByAccountId(accountId);
+        CommentLike like = commentLikeRepository.findByCommentAndAccount(comment, account)
+                .orElseThrow(() -> new CustomException(ErrorCode.LIKE_NOT_FOUND));
+        commentLikeRepository.delete(like);
+    }
+
+    private Comment findByCommentId(Long commentId) {
+        return commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+    }
+
+    private void authorizeCommentWriter(Comment comment, Account account) {
+        if (!comment.getWriter().equals(account)) {
+            throw new CustomException(ErrorCode.COMMENT_ACCOUNT_MISMATCH);
+        }
     }
 }
