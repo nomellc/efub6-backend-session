@@ -54,7 +54,7 @@ public class PostCommentController {
 
     // 댓글 좋아요
     @PostMapping("/comments/{commentId}/like")
-    public ResponseEntity<String> likeComment(@PathVariable("commmentId") Long commentId,
+    public ResponseEntity<String> likeComment(@PathVariable("commentId") Long commentId,
                                               @RequestHeader("Auth-id") Long accountId) {
         commentService.likeComment(commentId, accountId);
         return ResponseEntity.status(HttpStatus.CREATED).body("좋아요를 눌렀습니다.");
@@ -62,7 +62,7 @@ public class PostCommentController {
 
     // 댓글 좋아요 취소
     @DeleteMapping("/comments/{commentId}/like")
-    public ResponseEntity<String> unlikeComment(@PathVariable("commmentId") Long commentId,
+    public ResponseEntity<String> unlikeComment(@PathVariable("commentId") Long commentId,
                                                 @RequestHeader("Auth-id") Long accountId) {
         commentService.unlikeComment(commentId, accountId);
         return ResponseEntity.ok("좋아요가 취소되었어요.");
