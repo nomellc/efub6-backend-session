@@ -27,8 +27,8 @@ public record FollowListResponse(
 
     public static FollowListResponse of(List<Account> followers, List<Account> followings) {
         return new FollowListResponse(
-                followers.stream().map(a -> FollowUserDto.from(a)).toList(),
-                followings.stream().map(a -> FollowUserDto.from(a)).toList(),
+                followers.stream().map(FollowUserDto::from).toList(),
+                followings.stream().map(FollowUserDto::from).toList(),
                 followers.size(),
                 followings.size()
         );
