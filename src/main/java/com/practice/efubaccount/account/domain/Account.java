@@ -27,7 +27,7 @@ public class Account {
     private String password;
 
     // 회원 닉네임
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private String nickname;
 
     // 회원 자기소개, default 값은 "안녕하세요!"
@@ -39,7 +39,7 @@ public class Account {
     private AccountStatus status = AccountStatus.ACTIVE;
 
     // 연관관계의 Owner 설정
-    @OneToMany(mappedBy = "writer",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "writer",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Comment> commentList = new ArrayList<>();
 
     @Builder
@@ -56,4 +56,6 @@ public class Account {
     public void changeStatus(AccountStatus status) {
         this.status = status;
     }
+
+    public void updateNickname(String nickname) {this.nickname = nickname;}
 }
