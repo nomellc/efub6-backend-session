@@ -1,9 +1,9 @@
 package com.practice.efubaccount.account.domain;
 
-import  org.springframework.data.annotation.Id;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter

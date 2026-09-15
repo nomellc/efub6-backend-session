@@ -27,18 +27,14 @@ import java.util.concurrent.TimeUnit;
 public class AccountService {
 
     private final AccountRepository accountRepository;
-    // Redis 필요 필드 추가
-    private final RedisTemplate<String, Object> redisTemplate; // Redis와 통신
-    private HashOperations<String, String, Object> hashOperations; // Redis에 저장할 Hash 객체 선언
-    private static final String ACCOUNT_CACHE_KEY = "Account:"; // key의 접두사
+    private final RedisTemplate<String, Object> redisTemplate; //Redis와 통신
+    private final AccountDocumentRepository accountDocumentRepository; //Mongo DB용 Repository
+    private HashOperations<String, String, Object> hashOperations; //Redis에 저장할 Hash 객체 선언
+    private static final String ACCOUNT_CACHE_KEY = "Account:"; //key의 접두사
 
-    // MongoDB 필요 필드 추가
-    private final AccountDocumentRepository accountDocumentRepository;
-
-    // 초기화
     @PostConstruct
     public void init() {
-        this.hashOperations = redisTemplate.opsForHash(); // 초기화
+        this.hashOperations = redisTemplate.opsForHash(); //초기화
     }
 
     // 회원 단건 조회
@@ -58,29 +54,28 @@ public class AccountService {
         Account account = requestDto.toEntity();
         Account savedAccount = accountRepository.save(account);
 
-        // Redis에 저장
+        //Redis 해시에 이메일과 닉네임 저장
         cacheAccount(savedAccount);
 
-        // Mongo DB에 저장
+        //Mongo DB에 저장
         AccountDocument accountDocument = AccountDocument.from(savedAccount);
         accountDocumentRepository.save(accountDocument);
 
         return CreateAccountResponseDto.from(savedAccount);
     }
 
-    // Redis에서 조회
+    //Redis에서 ID로 email 조회
     @Transactional(readOnly = true)
     public String findEmailByIdFromRedis(Long accountId) {
         String redisKey = ACCOUNT_CACHE_KEY + accountId;
 
-        // Redis 해시에서 값 조회
+        //Redis 해시에서 값 조회
         Map<String, Object> hashEntries = hashOperations.entries(redisKey);
-
         if (hashEntries.isEmpty()) { //Redis에 값이 없는 경우
-            // DB에서 조회
+            //DB에서 조회
             Account account = findByAccountId(accountId);
 
-            // DB에서 조회한 정보를 Redis에 저장
+            //DB에서 조회한 정보를 Redis에 저장
             cacheAccount(account);
 
             return account.getEmail();
@@ -89,10 +84,10 @@ public class AccountService {
         return (String) hashEntries.get("email");
     }
 
-    // Mongo DB에서 조회
+    //Mongo DB에서 id로 닉네임 조회
     public String findNicknameByIdFromMongo(Long id) {
         String accountId = id.toString();
-        AccountDocument accountDocument = findAccountDocumentAccountId(accountId);
+        AccountDocument accountDocument = findAccountDocumentByAccountId(accountId);
 
         return accountDocument.getNickname();
     }
@@ -106,13 +101,11 @@ public class AccountService {
         account.updateBio(requestDto.getBio());
         account.updateNickname(requestDto.getNickname());
 
-        // Redis에서 nickname 업데이트
         String redisKey = ACCOUNT_CACHE_KEY + accountId;
         hashOperations.put(redisKey, "nickname", account.getNickname());
 
-        // Mongo DB에서 nickname 업데이트
         String stringAccountId = accountId.toString();
-        AccountDocument accountDocument = findAccountDocumentAccountId(stringAccountId);
+        AccountDocument accountDocument = findAccountDocumentByAccountId(stringAccountId);
 
         accountDocument.updateNickname(account.getNickname());
         accountDocumentRepository.save(accountDocument);
@@ -135,16 +128,16 @@ public class AccountService {
         Account account = accountRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
 
-        // Redis에서 삭제
+        //Redis에서 삭제
         String redisKey = ACCOUNT_CACHE_KEY + accountId;
         redisTemplate.delete(redisKey);
 
         //MySQL에서 삭제
         accountRepository.delete(account);
 
-        // Mongo DB에서 삭제
+        //MongoDB에서 삭제
         String stringAccountId = accountId.toString();
-        AccountDocument accountDocument = findAccountDocumentAccountId(stringAccountId);
+        AccountDocument accountDocument = findAccountDocumentByAccountId(stringAccountId);
         accountDocumentRepository.delete(accountDocument);
     }
 
@@ -160,20 +153,19 @@ public class AccountService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ACCOUNT_NOT_FOUND));
     }
 
-    // AccountDocument 조회 헬퍼 메소드
-    private AccountDocument findAccountDocumentAccountId(String accountId) {
+    @Transactional(readOnly=true)
+    public AccountDocument findAccountDocumentByAccountId(String accountId) {
         return accountDocumentRepository.findById(accountId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ACCOUNT_NOT_FOUND));
     }
 
-    // Account - Redis 저장 메소드
     private void cacheAccount(Account account) {
         String redisKey = ACCOUNT_CACHE_KEY + account.getAccountId();
 
         hashOperations.put(redisKey, "email", account.getEmail());
         hashOperations.put(redisKey, "nickname", account.getNickname());
 
-        // 만료시간 설정
+        //만료시간 설정
         redisTemplate.expire(redisKey, 30, TimeUnit.MINUTES);
     }
 

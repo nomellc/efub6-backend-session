@@ -11,22 +11,20 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
-@EnableCaching // 캐싱 기능 활성화
+@EnableCaching //캐싱 기능 활성화
 public class RedisConfig {
-    //설정
+
     @Value("${spring.data.redis.host}")
     private String host;
 
     @Value("${spring.data.redis.port}")
     private int port;
 
-    //Connection
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(host, port); // Redis와 통신하기 위한 클라이언트 라이브러리
+        return new LettuceConnectionFactory(host, port); //Redis와 통신하기 위한 클라이언트 라이브러리
     }
 
-    //RedisTemplate
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
