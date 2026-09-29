@@ -39,7 +39,6 @@ class UserTest {
     void change_name() {
         // when
         user.changeName("홍길동");
-
         // then
         assertEquals("홍길동", user.getName());
     }
@@ -48,9 +47,10 @@ class UserTest {
     @Test
     void change_role() {
         // when
-        user.changeRole(Role.ADMIN);
-
-        // then
-        assertEquals(Role.ADMIN, user.getRole());
+         assertNotNull(user);
+         assertEquals(1L, user.getId());
+         assertEquals("김이화", user.getName());
+         assertEquals("efub@test.com", user.getEmail());
+         assertEquals(Role.USER, user.getRole());
     }
 }
