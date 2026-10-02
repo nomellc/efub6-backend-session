@@ -69,8 +69,9 @@ class UserServiceTest {
         // given
         UserRequestDTO dto = new UserRequestDTO("홍길동", "efub@test.com");
         given(userRepository.existsByEmail(dto.getEmail())).willReturn(true);
-
-
+        // when & then
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
                 () -> userService.save(dto)
         );
         assertEquals("이미 존재하는 이메일입니다.", exception.getMessage());

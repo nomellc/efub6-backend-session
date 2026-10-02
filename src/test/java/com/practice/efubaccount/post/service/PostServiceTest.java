@@ -42,12 +42,37 @@ class PostServiceTest {
 
     @Test
     void PostService_생성_성공() {
-        // TODO 2) 기본 stubbing
+        // 2) 기본 stubbing
+        // given
+        given(accountService.findByAccountId(1L)).willReturn(testAccount);
+
+        // when
+        Account foundAccount = accountService.findByAccountId(1L);
+
+        // then
+        assertSame(testAccount, foundAccount);
     }
 
     @Test
     void deletePost_postRepository_delete에서_예외_전달() {
-        // TODO 3) 의도적 실패 주입 테스트
+        // 3) 의도적 실패 주입 테스트
+        // given
+        Post post = Post.builder()
+                .title("제목")
+                .content("내용")
+                .writer(testAccount)
+                .build();
+
+        given(postRepository.findById(10L)).willReturn(Optional.of(post));
+        given(accountService.findByAccountId(1L)).willReturn(testAccount);
+
+        willThrow(new IllegalArgumentException("삭제 실패"))
+                .given(postRepository).delete(any(Post.class));
+
+        // when & then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> postService.deletePost(10L, 1L));
+        assertEquals("삭제 실패", exception.getMessage());
     }
 
     @Test
@@ -60,9 +85,17 @@ class PostServiceTest {
                 .nickname("efub2")
                 .build();
 
-        // TODO 4) 여러번 호출
+        // 4) 여러번 호출
+        given(accountService.findByAccountId(any()))
+                .willReturn(a1)
+                .willThrow(new RuntimeException("두 번째 실패"))
+                .willReturn(a2);
 
-        // TODO 5) 검증
+        // 5) 검증
+        // when & then
+        assertSame(a1, accountService.findByAccountId(111L));
+        assertThrows(RuntimeException.class, () -> accountService.findByAccountId(222L));
+        assertSame(a2, accountService.findByAccountId(333L));
     }
 
     @Test
@@ -74,7 +107,16 @@ class PostServiceTest {
                 .writer(testAccount)
                 .build();
 
+        given(postRepository.findById(5L)).willReturn(Optional.of(post));
 
-        // TODO 6) Mock 객체 확인
+        // when
+        PostResponse res = postService.getPost(5L);
+
+        // 6) Mock 객체 확인
+        // then
+        assertNotNull(res);
+        verify(postRepository).increaseViewCount(5L);
+        verify(postRepository, times(1)).findById(5L);
+        verifyNoMoreInteractions(postRepository);
     }
 }
