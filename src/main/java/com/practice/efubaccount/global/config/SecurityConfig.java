@@ -9,13 +9,11 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -39,16 +37,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // CORS 설정 비활성화
                 .cors(AbstractHttpConfigurer::disable)
-                // 인증 실패 시 OAuth 로그인 페이지로 리다이렉트하지 않고 401 반환
-                .exceptionHandling(exception ->
-                        exception.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                )
                 // 요청에 따른 인증 인가 설정
                 .authorizeHttpRequests(requests -> {
                     /* 액세스토큰 재발급, GET요청은 모두 허용 */
                     requests.requestMatchers("/auth/token").permitAll();
                     requests.requestMatchers(HttpMethod.GET).permitAll();
-                    requests.requestMatchers(HttpMethod.POST, "/accounts").permitAll();
                     /* 다른 모든 요청은 인증을 요구 */
                     requests.anyRequest().authenticated();
                 })

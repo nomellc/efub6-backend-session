@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 // TODO 5) CustomPostRepository 상속하기
-public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRepository {
+public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query(
             value = """

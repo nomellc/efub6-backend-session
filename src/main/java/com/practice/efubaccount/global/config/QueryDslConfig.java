@@ -12,9 +12,6 @@ public class QueryDslConfig {
 
     private final EntityManager entityManager;
 
-    // 2) JPAQueryFactory를 Spring Bean으로 등록하기
-    @Bean
-    public JPAQueryFactory jpaQueryFactory() {
-        return new JPAQueryFactory(entityManager);
-    }
+    // TODO 2) JPAQueryFactory를 Spring Bean으로 등록하기
+
 }
